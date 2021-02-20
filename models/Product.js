@@ -3,35 +3,41 @@ const mongoose = require('mongoose'), Schema = mongoose.Schema;
 const ProductSchema = new Schema({
     name: {
         type: String,
+        default: '',
         require: true
     },
-    price: {
-        type: Number,
-        require: true
-    },
-    price_discounted: {
-        type: Boolean,
-        require: false
-    },
-    price_changed_date: {
-        type: Date,
-        require: false
-    },
-    discountPrice: {
-        type: Number,
-        require: false
-    },
-    categories: {
+    rates: {
         type: [],
-        items: String,
+        default: [],
+        items: Object,
         require: true
     },
-    description: {
+    category: {
         type: String,
         require: true
     },
+    bundle_category: {
+        type: String,
+        require: true
+    },
+    clos_front_category: {
+        type: String,
+        require: true
+    },
+    description: {
+        type: Object,
+        default: {},
+        require: false
+    },
     pictures: {
         type: [],
+        default: [],
+        items: String,
+        require: false
+    },
+    colors: {
+        type: [],
+        default: [],
         items: String,
         require: false
     },
@@ -39,20 +45,7 @@ const ProductSchema = new Schema({
         type: Number,
         require: false
     },
-    averages: {
-        type: [],
-        items: Object,
-        require: false
-    },
-    quantity: {
-        type: Number,
-        require: false
-    },
     sizes: {
-        type: String,
-        require: false
-    },
-    texture: {
         type: String,
         require: false
     },
@@ -60,14 +53,23 @@ const ProductSchema = new Schema({
         type: String,
         require: false
     },
-    material: {
+    available: {
+        type: Boolean,
+        require: false
+    },
+    hairInfo: {
+        type: Object,
+        require: true
+    },
+    style: {
         type: String,
         require: false
     },
-    type: {
-        type: String,
-        require: false
+    care: {
+        type: Object,
+        default: {},
+        require: true
     }
-});
+}, {timestamps: true});
 
 module.exports = mongoose.model('Product', ProductSchema);

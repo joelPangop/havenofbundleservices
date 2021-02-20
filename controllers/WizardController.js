@@ -6,10 +6,7 @@ require("../models/User");
 const User = mongoose.model("User");
 
 // mongoose.Promise = global.Promise;
-connection.connectionDb.then((res) => {
-    // res.on('error', console.error.bind(console, 'connection error:'));
-    console.log("Database connected");
-});
+connection.connectionDb
 const user = {
     "username": "admin",
     "password": "havenAdmin**",

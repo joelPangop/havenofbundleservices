@@ -10,44 +10,27 @@ const MailingInfos = mongoose.model('MailingInfos');
 require('../models/Mail');
 const Mail = mongoose.model('Mail');
 
+require('../models/Product')
+const Product = mongoose.model('Product');
+
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const SECRET_KEY = "secretkey23456";
 const nodemailer = require('nodemailer');
 
-const cors = require('cors')
-const whitelist = ['http://127.0.0.1:8080', 'http://127.0.0.1:8081']
+const GridFSBucket = require("multer-gridfs-storage");
+const multer = require("multer");
+const Grid = require('gridfs-stream');
+const crypto = require('crypto');
+const path = require('path');
 
-// router.use((req, res, next) => {
-//     res.header("Access-Control-Allow-Origin", "*");
-//     res.header("Access-Control-Allow-Headers",
-//         "Origin, X-Requeted-With, Content-Type, Accept, Authorization, RBR");
-//     if (req.headers.origin) {
-//         res.header('Access-Control-Allow-Origin', req.headers.origin);
-//     }
-//     // res.header("Access-Control-Allow-Methods", "PUT, POST, GET, OPTIONS, DELETE");
-//     if (req.method === 'OPTIONS') {
-//         res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE");
-//         return res.status(200).json({});
-//     }
-//     next();
-// })
+const cors = require('cors')
 
 router.use(cors({
     allowedOrigins: [
         '*'
     ]
 }));
-
-// const corsOptions = {
-//     origin: function (origin, callback) {
-//         if (whitelist.indexOf(origin) !== -1) {
-//             callback(null, true)
-//         } else {
-//             callback(new Error('Not allowed by CORS'))
-//         }
-//     }
-// }
 
 require('../models/User');
 const User = mongoose.model('User');
@@ -242,8 +225,72 @@ router.post('/mail', cors(), function (req, res, next) {
             // mailingInfos.isSent = true;
         }
     });
-
 });
 
+router.post('/product', async function (req, res, cb) {
+    const product = new Product();
+    product.name = req.body.name;
+    product.rate = req.body.rate;
+    product.category = req.body.category;
+    product.bundle_category = req.body.bundle_category;
+    product.clos_front_category = req.body.clos_front_category;
+    product.description = req.body.description;
+    product.pictures = req.body.pictures;
+    product.rates = req.body.rates;
+    product.colors = req.body.colors;
+    product.averageStar = req.body.averageStar;
+    product.sizes = req.body.sizes;
+    product.origin = req.body.origin;
+    product.available = req.body.available;
+    product.hairInfo = req.body.hairInfo;
+    product.style = req.body.style;
+    product.care = req.body.care;
+    await product.save();
+
+    res.status(200).send({result: 'success', res: product});
+});
+
+router.put('/product/:id', async function (req, res, cb) {
+    const id = req.params.id;
+    let product = await Product.findOne({_id: id});
+    const prod = new Product(req.body);
+    product.name = prod.name;
+    product.rates = prod.rates;
+    product.category = prod.category;
+    product.bundle_category = prod.bundle_category;
+    product.clos_front_category = prod.clos_front_category;
+    product.description = prod.description;
+    product.pictures = prod.pictures;
+    product.rates = prod.rates;
+    product.colors = prod.colors;
+    product.averageStar = prod.averageStar;
+    product.sizes = prod.sizes;
+    product.origin = prod.origin;
+    product.available = prod.available;
+    product.hairInfo = prod.hairInfo;
+    product.style = prod.style;
+    product.care = prod.care;
+    await product.save();
+    res.status(200).send(product);
+});
+
+router.get('/products', async function (req, res, cb) {
+    const products = await Product.find({});
+    res.status(200).send(products);
+})
+
+router.get('/product/:id', async function (req, res, cb) {
+    const id = req.params.id;
+
+    let promise = Product.findOne({_id: id});
+
+    promise.then(function (product) {
+        res.status(200).send(product);
+    })
+
+    promise.catch(function (err) {
+        return res.status(501).json({message: 'Some internal error'});
+    })
+})
 
 module.exports = router;
