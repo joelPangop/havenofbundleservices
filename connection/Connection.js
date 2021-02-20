@@ -17,5 +17,5 @@ const mongoUrl = "mongodb://127.0.0.1:27017/havenofbundles";
 // const mongoUrl = "mongodb://127.0.0.1:27017/havenofbundles" || process.env.mongodb_url;
 
 module.exports = {
-    connectionDb: mongoose.connect(mongoUrl, config)
+    connectionDb: mongoose.connect(mongoDBUrl, config)
 };
