@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require('mongoose');
+const db_url = require('../models/db_url')
 
 mongoose.Promise = global.Promise;
 mongoose.set('debug', true);
@@ -11,11 +12,7 @@ const config = {
     useUnifiedTopology: true,
     useCreateIndex: true
 };
-// const mongoDBUrl = "mongodb+srv://root:Abc123...@havenofbundles.ekcly.mongodb.net/havenofbundles?retryWrites=true&w=majority";
-const mongoDBUrl = "mongodb+srv://root:Abc123...@egoal-shoppingdb.piyf9.mongodb.net/havenofbundles?retryWrites=true&w=majority";
-const mongoUrl = "mongodb://127.0.0.1:27017/havenofbundles";
-// const mongoUrl = "mongodb://127.0.0.1:27017/havenofbundles" || process.env.mongodb_url;
 
 module.exports = {
-    connectionDb: mongoose.connect(mongoDBUrl, config)
+    connectionDb: mongoose.connect(db_url.url, config)
 };

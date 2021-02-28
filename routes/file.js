@@ -3,7 +3,10 @@ const router = express.Router();
 
 const mongoose = require('mongoose')
 
-const GridFSBucket = require("multer-gridfs-storage");
+const GridFsStorage = require('multer-gridfs-storage');
+
+const db_url = require('../models/db_url')
+
 const multer = require("multer");
 const Grid = require('gridfs-stream');
 const crypto = require('crypto');
@@ -20,7 +23,8 @@ router.use(cors({
 
 let gfs;
 
-let mongoURI = "mongodb://localhost:27017/havenofbundles";
+// let mongoURI = "mongodb://localhost:27017/havenofbundles";
+// let mongoURI = "mongodb://localhost:27017/havenofbundles";
 
 let connection = require('../connection/Connection');
 connection.connectionDb.then(res => {
@@ -30,8 +34,8 @@ connection.connectionDb.then(res => {
 });
 
 // Create storage engine
-const storage = new GridFSBucket({
-    url: mongoURI,
+const storage = new GridFsStorage({
+    url: db_url.url,
     file: (req, file) => {
         return new Promise((resolve, reject) => {
             crypto.randomBytes(16, (err, buf) => {

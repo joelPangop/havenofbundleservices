@@ -18,12 +18,6 @@ const bcrypt = require('bcryptjs');
 const SECRET_KEY = "secretkey23456";
 const nodemailer = require('nodemailer');
 
-const GridFSBucket = require("multer-gridfs-storage");
-const multer = require("multer");
-const Grid = require('gridfs-stream');
-const crypto = require('crypto');
-const path = require('path');
-
 const cors = require('cors')
 
 router.use(cors({
