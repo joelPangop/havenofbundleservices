@@ -2,17 +2,21 @@ const mongoose = require('mongoose'), Schema = mongoose.Schema;
 const product = require("./Product").schema;
 
 const BundleSetSchema = new Schema({
-    name: {
+    title: {
         type: String,
         require: true
     },
     features: {
         type: [],
-        items: product,
+        items: Object,
         require: true
     },
-    category: {
+    productId: {
         type: String,
+        require: true
+    },
+    price: {
+        type: Number,
         require: true
     },
     supplement: {
