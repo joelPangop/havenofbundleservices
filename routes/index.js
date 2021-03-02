@@ -13,6 +13,9 @@ const Mail = mongoose.model('Mail');
 require('../models/Product')
 const Product = mongoose.model('Product');
 
+require('../models/BundleSet')
+const BundleSet = mongoose.model('BundleSet');
+
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const SECRET_KEY = "secretkey23456";
@@ -280,6 +283,57 @@ router.get('/product/:id', async function (req, res, cb) {
 
     promise.then(function (product) {
         res.status(200).send(product);
+    })
+
+    promise.catch(function (err) {
+        return res.status(501).json({message: 'Some internal error'});
+    })
+})
+
+router.post('/bundleset', async function (req, res, cb) {
+    const bundleSet = new BundleSet();
+    bundleSet.title = req.body.title;
+    bundleSet.features = req.body.features;
+    bundleSet.productId = req.body.productId;
+    bundleSet.category = req.body.category;
+    bundleSet.price = req.body.price;
+    bundleSet.supplement = req.body.supplement;
+
+    await bundleSet.save();
+
+    res.status(200).send({result: 'success', res: bundleSet});
+});
+
+router.put('/bundleset/:id', async function (req, res, cb) {
+    const id = req.params.id;
+
+    const bundleSetToChange = await BundleSet.findOne({'_id': id});
+    const bundleSet = new BundleSet(req.body);
+
+    bundleSetToChange.title = bundleSet.title;
+    bundleSetToChange.features = bundleSet.features;
+    bundleSetToChange.productId = bundleSet.productId;
+    bundleSetToChange.category = bundleSet.category;
+    bundleSetToChange.price = bundleSet.price;
+    bundleSetToChange.supplement = bundleSet.supplement;
+
+    await bundleSetToChange.save();
+
+    res.status(200).send({result: 'success', res: bundleSet});
+});
+
+router.get('/bundleset', async function (req, res, cb) {
+    const bundleset = await BundleSet.find({});
+    res.status(200).send(bundleset);
+})
+
+router.get('/bundleset/:id', async function (req, res, cb) {
+    const id = req.params.id;
+
+    let promise = BundleSet.findOne({_id: id});
+
+    promise.then(function (bundleset) {
+        res.status(200).send(bundleset);
     })
 
     promise.catch(function (err) {
