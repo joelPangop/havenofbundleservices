@@ -19,6 +19,12 @@ const BundleSetSchema = new Schema({
         type: String,
         require: true
     },
+    pictures: {
+        type: [],
+        default: [],
+        items: String,
+        require: false
+    },
     price: {
         type: Number,
         require: true
