@@ -135,45 +135,14 @@ router.post('/user', async function (req, res, cb) {
     }
 });
 
-router.get('/users', async function (req, res, cb) {
-    const users = await MailingInfos.find({type: undefined});
-    // res.status(200).json(articles);
-    console.log('users', users);
-    res.status(200).json({users: users});
-});
-
-router.post('/login', function (req, res, next) {
-    const email = req.body.user.email;
-    const password = req.body.user.password;
-    let val = validatorCredentials.isEmail(email);
-    let promise = User.findOne({email: email});
-    if (val) {
-        promise.then(function (doc) {
-            if (doc) {
-                if (bcrypt.compareSync(password, doc.password)) {
-                    let token = jwt.sign({email: doc.email}, SECRET_KEY, {expiresIn: '3h'});
-                    res.status(200).json({user: doc, access_token: token, status: 'success'});
-                } else {
-                    return res.status(401).json({message: 'Invalid credentials!'});
-                }
-            } else {
-                return res.status(401).json({message: 'Invalid email!'});
-            }
-        })
-        promise.catch(function (err) {
-            return res.status(501).json({message: 'Some internal error'});
-        })
-    } else {
-        return res.status(401).json({message: 'Invalid email!'});
-    }
-})
-
 router.post('/mail', cors(), function (req, res, next) {
     const mail = new Mail();
     mail.to = req.body.email;
     mail.from = 'admin@egoal-shopping.com';
-    mail.subject = "Registration Succeed";
-    mail.text = 'Thank you for signing up.';
+    mail.subject = req.body.subject;
+    // mail.subject = "Registration Succeed";
+    mail.text = req.body.text;
+    // mail.text = 'Thank you for signing up.';
     console.log('mail', mail);
 
     const transporter = nodemailer.createTransport({
@@ -191,10 +160,11 @@ router.post('/mail', cors(), function (req, res, next) {
         from: mail.from,
         to: mail.to,
         subject: mail.subject,
-        html: '<!DOCTYPE html>\n' +
-            '<html lang="en">\n' +
-            '<head> <meta charset="UTF-8"/></head><body><h1>Welcome <label style="color: #ab924d">' + req.body.firstname + '</label></h1><br/><p>' + mail.text + '</p>' +
-            '</body></html>'
+        text: mail.text
+        // html: '<!DOCTYPE html>\n' +
+        //     '<html lang="en">\n' +
+        //     '<head> <meta charset="UTF-8"/></head><body><h1>Welcome <label style="color: #ab924d">' + req.body.firstname + '</label></h1><br/><p>' + mail.text + '</p>' +
+        //     '</body></html>'
     };
 
     transporter.sendMail(mailOptions, async function (error, info) {
@@ -291,7 +261,7 @@ router.get('/product/:id', async function (req, res, cb) {
 })
 
 router.post('/bundleset', async function (req, res, cb) {
-    const bundleSet = new BundleSet();
+    let bundleSet = new BundleSet();
     bundleSet.title = req.body.title;
     bundleSet.features = req.body.features;
     bundleSet.productId = req.body.productId;
@@ -308,7 +278,7 @@ router.post('/bundleset', async function (req, res, cb) {
 router.put('/bundleset/:id', async function (req, res, cb) {
     const id = req.params.id;
 
-    const bundleSetToChange = await BundleSet.findOne({'_id': id});
+    let bundleSetToChange = await BundleSet.findOne({'_id': id});
     const bundleSet = new BundleSet(req.body);
 
     bundleSetToChange.title = bundleSet.title;
@@ -341,6 +311,6 @@ router.get('/bundleset/:id', async function (req, res, cb) {
     promise.catch(function (err) {
         return res.status(501).json({message: 'Some internal error'});
     })
-})
+});
 
 module.exports = router;

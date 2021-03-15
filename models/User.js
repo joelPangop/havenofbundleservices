@@ -1,5 +1,6 @@
 const mongoose = require('mongoose'), Schema = mongoose.Schema;
 const userInfo = require("./UserInfo").schema;
+const file = require("./File").schema;
 const bcrypt = require('bcryptjs');
 
 const UserSchema = new Schema({
@@ -16,14 +17,10 @@ const UserSchema = new Schema({
         require: false,
         unique: false
     },
-    contact: {
-        type: String,
+    avatar: {
+        type: file,
         require: false
     },
-    // avatar: {
-    //     type: file,
-    //     require: false
-    // },
     type: {
         type: String,
         require: false
@@ -36,8 +33,8 @@ const UserSchema = new Schema({
         type: Object,
         require: false
     },
-    verified: {
-        type: Boolean,
+    birthday: {
+        type: Date,
         require: false
     },
     userInfo: userInfo

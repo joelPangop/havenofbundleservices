@@ -27,7 +27,7 @@ app.use(bodyParser.json({ type: 'application/*+json' }));
 app.use(bodyParser.raw({ limit: '50mb' }));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/user', usersRouter);
 app.use('/file', fileRouter);
 
 // catch 404 and forward to error handler
