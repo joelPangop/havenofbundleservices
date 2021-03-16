@@ -264,7 +264,7 @@ router.post('/bundleset', async function (req, res, cb) {
     let bundleSet = new BundleSet();
     bundleSet.title = req.body.title;
     bundleSet.features = req.body.features;
-    bundleSet.productId = req.body.productId;
+    bundleSet.product = req.body.product;
     bundleSet.category = req.body.category;
     bundleSet.pictures = req.body.pictures;
     bundleSet.price = req.body.price;
@@ -283,7 +283,7 @@ router.put('/bundleset/:id', async function (req, res, cb) {
 
     bundleSetToChange.title = bundleSet.title;
     bundleSetToChange.features = bundleSet.features;
-    bundleSetToChange.productId = bundleSet.productId;
+    bundleSetToChange.product = bundleSet.product;
     bundleSetToChange.category = bundleSet.category;
     bundleSetToChange.pictures = bundleSet.pictures;
     bundleSetToChange.price = bundleSet.price;

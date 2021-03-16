@@ -7,6 +7,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const SECRET_KEY = "secretkey23456";
 
+const userService = require('../services/userservices');
+
 require('../models/User');
 const User = mongoose.model('User');
 
@@ -35,25 +37,13 @@ router.post('/login', function (req, res, next) {
   const password = req.body.password;
   let val = validatorCredentials.isEmail(email);
   let promise = User.findOne({email: email});
-  if (val) {
-    promise.then(function (doc) {
-      if (doc) {
-        if (bcrypt.compareSync(password, doc.password)) {
-          let token = jwt.sign({email: doc.email}, SECRET_KEY, {expiresIn: '3h'});
-          res.status(200).json({user: doc, access_token: token, status: 'success'});
-        } else {
-          return res.status(401).json({message: 'Invalid credentials!'});
-        }
-      } else {
-        return res.status(401).json({message: 'Invalid email!'});
-      }
-    })
-    promise.catch(function (err) {
-      return res.status(501).json({message: 'Some internal error'});
-    })
-  } else {
-    return res.status(401).json({message: 'Invalid email!'});
-  }
+  const ipAddress = req.ip;
+  userService.authenticate({ email, password, ipAddress })
+      .then(({ jwtToken, refreshToken, ...user }) => {
+        setTokenCookie(res, refreshToken);
+        res.json({user, refreshToken: refreshToken, accessToken: jwtToken});
+      })
+      .catch(next);
 })
 
 let decodedToken = '';
@@ -116,5 +106,36 @@ router.post('/register', async (req, res) => {
     return res.status(401).json({message: 'Invalid email!'});
   }
 });
+
+async function getRefreshToken(token) {
+  const refreshToken = await db.RefreshToken.findOne({ token }).populate('user');
+  if (!refreshToken || !refreshToken.isActive) throw 'Invalid token';
+  return refreshToken;
+}
+
+function generateJwtToken(user) {
+  // create a jwt token containing the user id that expires in 15 minutes
+  return jwt.sign({ sub: user.id, id: user.id }, config.secret, { expiresIn: '15m' });
+}
+
+function generateRefreshToken(user, ipAddress) {
+  // create a refresh token that expires in 7 days
+  return new db.RefreshToken({
+    user: user.id,
+    token: randomTokenString(),
+    expires: new Date(Date.now() + 7*24*60*60*1000),
+    createdByIp: ipAddress
+  });
+}
+
+function setTokenCookie(res, token)
+{
+  // create http only cookie with refresh token that expires in 7 days
+  const cookieOptions = {
+    httpOnly: true,
+    expires: new Date(Date.now() + 7*24*60*60*1000)
+  };
+  res.cookie('refreshToken', token, cookieOptions);
+}
 
 module.exports = router;

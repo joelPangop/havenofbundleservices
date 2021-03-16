@@ -11,8 +11,8 @@ const BundleSetSchema = new Schema({
         items: Object,
         require: true
     },
-    productId: {
-        type: String,
+    product: {
+        type: product,
         require: true
     },
     category: {
