@@ -106,8 +106,12 @@ async function getRefreshToken(token) {
 }
 
 function generateJwtToken(user) {
+
     // create a jwt token containing the user id that expires in 15 minutes
-    return jwt.sign({ email: user.email, id: user.id }, config.secret, { expiresIn: '1h' });
+    const expiresIn = 24 * 60 * 60;
+    return jwt.sign({id: user.id}, config.secret, {
+        expiresIn: expiresIn
+    });
 }
 
 function generateRefreshToken(user, ipAddress) {

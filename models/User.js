@@ -1,6 +1,7 @@
 const mongoose = require('mongoose'), Schema = mongoose.Schema;
 const userInfo = require("./UserInfo").schema;
 const file = require("./File").schema;
+const address = require("./Address").schema;
 const bcrypt = require('bcryptjs');
 
 const UserSchema = new Schema({
@@ -35,6 +36,10 @@ const UserSchema = new Schema({
     },
     birthday: {
         type: Date,
+        require: false
+    },
+    shipping_addr: {
+        type: address,
         require: false
     },
     userInfo: userInfo
