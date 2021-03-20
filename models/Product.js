@@ -69,6 +69,11 @@ const ProductSchema = new Schema({
         type: Object,
         default: {},
         require: true
+    },
+    likes: {
+        type: [],
+        items: String,
+        require: false
     }
 }, {timestamps: true});
 

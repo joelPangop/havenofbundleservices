@@ -27,7 +27,8 @@ router.get('/', function (req, res, next) {
 
 router.get('/user/:id', async function (req, res, cb) {
     const id = req.params.id;
-    const user = await User.findOne({"_id": id});
+    let user = await User.findOne({"_id": id});
+    user.password = "";
     // res.status(200).json(articles);
     console.log('users', user);
     res.status(200).json({user: user});
@@ -89,7 +90,7 @@ router.post('/register', async (req, res) => {
                 user.username = req.body.username;
                 user.email = req.body.email;
                 user.avatar = req.body.avatar;
-                user.password = req.body.password;
+                user.password = bcrypt.hashSync(req.body.password, 8);
                 user.userInfo = req.body.userInfo;
                 user.birthday = new Date(req.body.birthday);
                 await user.save();
@@ -126,7 +127,6 @@ router.put('/update/:id', async (req, res) => {
             user.username = req.body.username;
             user.email = req.body.email;
             user.avatar = req.body.avatar;
-            user.password = req.body.password;
             user.userInfo = req.body.userInfo;
             user.shipping_addr = req.body.shipping_addr;
             user.birthday = new Date(req.body.birthday);
@@ -141,6 +141,26 @@ router.put('/update/:id', async (req, res) => {
         return res.status(501).json({result: 'failed', message: 'Some internal error'});
     })
 })
+
+router.put('/update/password/:id', async (req, res) => {
+    const id = req.params.id;
+    console.log(req.body);
+    let promise = User.findOne({_id: id});
+    promise.then(async function (doc) {
+        if (doc) {
+            let user = new User(doc);
+            user.password = bcrypt.hashSync(req.body.password, 8);
+            await user.save();
+            user.password = '';
+            res.status(200).send({result: 'success', user: user});
+        } else {
+            return res.status(402).json({message: 'User not found'});
+        }
+    })
+    promise.catch(function (err) {
+        return res.status(501).json({result: 'failed', message: 'Some internal error'});
+    })
+});
 
 async function getRefreshToken(token) {
     const refreshToken = await db.RefreshToken.findOne({token}).populate('user');
