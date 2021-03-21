@@ -32,6 +32,11 @@ const BundleSetSchema = new Schema({
     supplement: {
         type: Object,
         require: true
+    },
+    likes: {
+        type: [],
+        items: String,
+        require: false
     }
 });
 

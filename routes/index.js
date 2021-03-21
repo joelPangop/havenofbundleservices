@@ -220,7 +220,7 @@ router.post('/product', async function (req, res, cb) {
 router.put('/product/:id', async function (req, res, cb) {
     const id = req.params.id;
     let product = await Product.findOne({_id: id});
-    const prod = new Product(req.body);
+    let prod = new Product(req.body);
     product.name = prod.name;
     product.rates = prod.rates;
     product.category = prod.category;
@@ -237,6 +237,15 @@ router.put('/product/:id', async function (req, res, cb) {
     product.hairInfo = prod.hairInfo;
     product.style = prod.style;
     product.care = prod.care;
+    await product.save();
+    res.status(200).send(product);
+});
+
+router.put('/product/like/productId/:id', async function (req, res, cb) {
+    const id = req.params.id;
+    let product = await Product.findOne({_id: id});
+    let prod = new Product(req.body);
+    product.likes = prod.likes;
     await product.save();
     res.status(200).send(product);
 });
@@ -292,6 +301,15 @@ router.put('/bundleset/:id', async function (req, res, cb) {
     await bundleSetToChange.save();
 
     res.status(200).send({result: 'success', res: bundleSet});
+});
+
+router.put('/bundleset/like/bundlesetId/:id', async function (req, res, cb) {
+    const id = req.params.id;
+    let bundleSetToChange = await BundleSet.findOne({'_id': id});
+    const bundleSet = new BundleSet(req.body);
+    bundleSetToChange.likes = bundleSet.likes;
+    await bundleSetToChange.save();
+    res.status(200).send(bundleSetToChange);
 });
 
 router.get('/bundleset', async function (req, res, cb) {
