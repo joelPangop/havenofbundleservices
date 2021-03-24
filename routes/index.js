@@ -135,14 +135,14 @@ router.post('/user', async function (req, res, cb) {
     }
 });
 
-router.post('/mail', cors(), function (req, res, next) {
+router.post('/mail', cors(), async function (req, res, next) {
     const mail = new Mail();
     mail.to = req.body.email;
     mail.from = 'admin@egoal-shopping.com';
-    mail.subject = req.body.subject;
-    // mail.subject = "Registration Succeed";
-    mail.text = req.body.text;
-    // mail.text = 'Thank you for signing up.';
+    // mail.subject = req.body.subject;
+    mail.subject = "Registration Succeed";
+    // mail.text = req.body.text;
+    mail.text = 'Thank you for signing up.';
     console.log('mail', mail);
 
     const transporter = nodemailer.createTransport({
@@ -160,15 +160,13 @@ router.post('/mail', cors(), function (req, res, next) {
         from: mail.from,
         to: mail.to,
         subject: mail.subject,
-        text: mail.text
-        // html: '<!DOCTYPE html>\n' +
-        //     '<html lang="en">\n' +
-        //     '<head> <meta charset="UTF-8"/></head><body><h1>Welcome <label style="color: #ab924d">' + req.body.firstname + '</label></h1><br/><p>' + mail.text + '</p>' +
-        //     '</body></html>'
+        html: '<!DOCTYPE html>\n' +
+            '<html lang="en">\n' +
+            '<head> <meta charset="UTF-8"/></head><body><h1>Welcome <label style="color: #ab924d">' + req.body.firstname + '</label></h1><br/><p>' + mail.text + '</p>' +
+            '</body></html>'
     };
 
-    transporter.sendMail(mailOptions, async function (error, info) {
-
+    await transporter.sendMail(mailOptions, async function (error, info) {
         if (error) {
             console.log(error);
             res.status(404).json({message: info.response, status: 'failed'});

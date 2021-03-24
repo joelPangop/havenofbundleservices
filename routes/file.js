@@ -14,6 +14,7 @@ const path = require('path');
 
 const cors = require('cors')
 let fileSaved = [];
+let profile = '';
 
 router.use(cors({
     allowedOrigins: [
@@ -49,6 +50,7 @@ const storage = new GridFsStorage({
                 };
                 resolve(fileInfo);
                 fileSaved.push(file.originalname);
+                profile = filename;
                 console.log('file', fileSaved);
             });
         });
@@ -113,11 +115,6 @@ router.post('/upload', upload.array('file', 10), (req, res) => {
     res.json({"files": files});
 });
 
-// @route POST /upload
-// @desc  Uploads file to DB
-router.post('/uploadImgProfil', upload.single("file"), (req, res) => {
-    res.json({"filename": fileSaved[0]});
-});
 
 // @route GET /files
 // @desc  Display all files in JSON

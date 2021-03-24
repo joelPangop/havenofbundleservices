@@ -12,7 +12,21 @@ const userService = require('../services/userservices');
 require('../models/User');
 const User = mongoose.model('User');
 
+require('../models/Mail');
+const Mail = mongoose.model('Mail');
+
+const GridFsStorage = require('multer-gridfs-storage');
+
+const db_url = require('../models/db_url')
+
+const multer = require("multer");
+const Grid = require('gridfs-stream');
+const crypto = require('crypto');
+const path = require('path');
+const nodemailer = require('nodemailer');
 const cors = require('cors')
+
+let profile = '';
 
 router.use(cors({
     allowedOrigins: [
@@ -31,7 +45,7 @@ router.get('/user/:id', async function (req, res, cb) {
     user.password = "";
     // res.status(200).json(articles);
     console.log('users', user);
-    res.status(200).json({user: user});
+    res.status(200).send( user);
 });
 
 router.get('/user', async function (req, res, cb) {
@@ -149,9 +163,29 @@ router.put('/update/password/:id', async (req, res) => {
     promise.then(async function (doc) {
         if (doc) {
             let user = new User(doc);
+            user.userInfo = req.body.userInfo;
             user.password = bcrypt.hashSync(req.body.password, 8);
             await user.save();
             user.password = '';
+            res.status(200).send({result: 'success', user: user});
+        } else {
+            return res.status(402).json({message: 'User not found'});
+        }
+    })
+    promise.catch(function (err) {
+        return res.status(501).json({result: 'failed', message: 'Some internal error'});
+    })
+});
+
+router.put('/update/image/:id', async (req, res) => {
+    const id = req.params.id;
+    console.log(req.body);
+    let promise = User.findOne({_id: id});
+    promise.then(async function (doc) {
+        if (doc) {
+            let user = new User(doc);
+            user.avatar = req.body.avatar;
+            await user.save();
             res.status(200).send({result: 'success', user: user});
         } else {
             return res.status(402).json({message: 'User not found'});
@@ -191,5 +225,94 @@ function setTokenCookie(res, token) {
     };
     res.cookie('refreshToken', token, cookieOptions);
 }
+
+
+// Create storage engine
+const storage = new GridFsStorage({
+    url: db_url.url,
+    file: (req, file) => {
+        return new Promise((resolve, reject) => {
+            crypto.randomBytes(16, (err, buf) => {
+                if (err) {
+                    return reject(err);
+                }
+                const filename = buf.toString('hex') + path.extname(file.originalname);
+                const fileInfo = {
+                    filename: filename,
+                    bucketName: 'uploads'
+                };
+                resolve(fileInfo);
+                profile = filename;
+                console.log('file', filename);
+            });
+        });
+    }
+});
+
+const upload = multer({storage});
+
+// @route POST /upload
+// @desc  Uploads file to DB
+router.post('/uploadImgProfile', upload.single("file"), (req, res) => {
+    res.json({"filename":profile});
+});
+
+router.post('/mail', async function (req, res, next) {
+    let mail = new Mail();
+    mail.to = req.body.to;
+    mail.from = 'admin@egoal-shopping.com';
+    mail.subject = req.body.subject;
+    mail.text = req.body.text;
+    console.log('mail', mail);
+
+    const transporter = nodemailer.createTransport({
+        // service: 'gmail',
+        host: 'mail.privateemail.com',
+        secure: true,
+        port: 465,
+        auth: {
+            user: 'admin@egoal-shopping.com',
+            pass: 'Jojo0689'
+        }
+    });
+
+    const mailOptions = {
+        from: mail.from,
+        to: mail.to,
+        subject: mail.subject,
+        text: mail.text
+    };
+
+    await transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            console.log(error);
+            res.status(404);
+        } else {
+            console.log('Email sent: ' + info.response);
+            mail.save();
+            res.status(200).json(info.response);
+        }
+    });
+});
+
+router.put('/update_verification', async (req, res) => {
+    const user = new User(req.body);
+    const usr = await User.findOne({"_id": user.id});
+    if (usr) {
+        try {
+            usr.verified = user.verified;
+            return new Promise(async function (resolve, reject) {
+                console.log(resolve);
+                usr.save(function (err, user) {
+                    if (err) return console.error(err);
+                });
+
+                res.status(200).send({statusCode: "success", user: usr});
+            });
+        } catch (error) {
+            return res.send({status: 1, statusCode: "error", message: error.message});
+        }
+    }
+});
 
 module.exports = router;
