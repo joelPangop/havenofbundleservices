@@ -61,12 +61,21 @@ router.post('/login', function (req, res, next) {
     let val = validatorCredentials.isEmail(email);
     let promise = User.findOne({email: email});
     const ipAddress = req.ip;
-    userService.authenticate({email, password, ipAddress})
-        .then(({jwtToken, refreshToken, ...user}) => {
-            setTokenCookie(res, refreshToken);
-            res.json({user, refreshToken: refreshToken, accessToken: jwtToken});
+    if (val) {
+        promise.then(async function (doc) {
+            if (doc) {
+                userService.authenticate({email, password, ipAddress})
+                    .then(({jwtToken, refreshToken, ...user}) => {
+                        setTokenCookie(res, refreshToken);
+                        res.json({user, refreshToken: refreshToken, accessToken: jwtToken});
+                    })
+                    .catch(next);
+            } else {
+                return res.status(402).json({message: 'Email ' + email + ' does not exist in our database!'});
+            }
         })
-        .catch(next);
+    }
+
 })
 
 let decodedToken = '';
